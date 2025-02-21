@@ -40,3 +40,11 @@ def main():
 def consultarTodaTarea():
     return{"Lista de tareas": tareas}
 
+
+#endpoint para consultar una tarea por su id
+@app.get('/tarea/{id}',tags=['Mostrar tarea por ID'])
+def consultaTarea(id:int):
+    for tarea in tareas:
+            if tarea["id"]== id:
+                return {"mensaje":"Tarea encontrada","Tarea":tarea}
+    raise HTTPException(status_code=404, detail="Tarea no encontrada")
