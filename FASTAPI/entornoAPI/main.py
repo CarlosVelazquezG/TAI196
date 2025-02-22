@@ -1,6 +1,6 @@
-
 from fastapi import FastAPI
 from typing import Optional
+from pydantic import BaseModel
 
 app = FastAPI(
     title = 'Mi primer API 196', 
@@ -8,11 +8,18 @@ app = FastAPI(
     version = '1.0.1'
 )
 
+#modelo para validación de datos
+class modelUsuario(BaseModel):
+    id:int
+    nombre:str
+    edad:int
+    correo:str
+
 usuarios = [
-    {"id":1,"nombre":"alondra", "edad":22},
-    {"id":2,"nombre":"carlos", "edad":22},
-    {"id":3,"nombre":"antonio", "edad":23},
-    {"id":4,"nombre":"danna", "edad":21}
+    {"id":1,"nombre":"alondra", "edad":22,"correo":"alondra@ejemplo.com"},
+    {"id":2,"nombre":"carlos", "edad":22,"correo":"carlos@ejemplo.com"},
+    {"id":3,"nombre":"antonio", "edad":23,"correo":"antonio@ejemplo.com"},
+    {"id":4,"nombre":"danna", "edad":21,"correo":"danna@ejemplo.com"}
 ]
 
 @app.get('/',tags=['Inicio'])
