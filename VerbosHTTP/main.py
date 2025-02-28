@@ -1,12 +1,13 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import JSONResponse
 from typing import Optional, List
-from modelsPydantic import modelUsuario
+from modelsPydantic import modelUsuario, modelAuth
+from tokenGen import createToken
 
 app= FastAPI(
     title='Mi primer API',
     description='Carlos Velázquez',
     version='1.0.'
-
 )
 
 usuarios = [
@@ -19,6 +20,16 @@ usuarios = [
 @app.get('/',tags=['Inicio'])
 def main():
     return{'hello FastAPI':'Carlos Velázquez'}
+
+#endpoint para generar un token
+@app.post('/auth', tags=['Autentificación'])
+def login(autorizado:modelAuth):
+    if autorizado.correo == 'carlos@example.com' and autorizado.passw == '123456789':
+        token:str = createToken(autorizado.model_dump())
+        print(token)
+        return {'Aviso': 'Token autorizado'}
+    else:
+        return {'Aviso':'Usuario no autorizado'}
 
 #endpoint para consultar datos 
 @app.get('/usuarios', response_model= List[modelUsuario], tags=['Operaciones CRUD'])
@@ -52,3 +63,5 @@ def eliminar_usuario(id: int):
             usuarios.remove(usuario)
             return {"mensaje": "Usuario eliminado correctamente"}
     raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+#
