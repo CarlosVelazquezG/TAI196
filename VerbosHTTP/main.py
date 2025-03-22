@@ -4,12 +4,17 @@ from typing import Optional, List
 from modelsPydantic import modelUsuario, modelAuth
 from tokenGen import createToken
 from middlewares import bearerJWT
+from DB.conexion import Session, engine, Base
+from models.modelsDB import User
 
 app= FastAPI(
     title='Mi primer API',
     description='Carlos Velázquez',
     version='1.0.'
 )
+
+#Levantamiento de las tablas definidas en los modelos
+Base.metadata.create_all(bind=engine)
 
 usuarios = [
     {"id":1,"nombre":"alondra", "edad":22,"correo":"alondra@ejemplo.com"},
@@ -40,13 +45,19 @@ def ConsultarTodos():
 #endpoint para agregar usuarios
 @app.post('/usuarios/', response_model=modelUsuario, tags=['Operaciones CRUD'])
 def AgregarUsuarios(usuarionuevo: modelUsuario):
-        for usr in usuarios:
-            if usr ["id"] == usuarionuevo.id:
-                raise HTTPException(status_code=400, detail="El id ya está registrado")
-            
-        usuarios.append(usuarionuevo)
-        return usuarionuevo
-            
+    db= Session()
+    try:
+        db.add(User(**usuarionuevo.model_dump()))
+        db.commit()
+        return JSONResponse(status_code=201,content={"mensaje":"Usuario Guardado","usuario":usuarionuevo.model_dump()})
+    
+    except Exception as e:
+        db.rollback()
+        return JSONResponse(status_code=500,content={"mensaje":"NO Guardado","Excepcion":str(e)})
+
+    finally:
+        db.close()
+        
 #endpoint para actualizar usuario
 @app.put('/usuarios/{id}', response_model=modelUsuario,tags=['Operaciones CRUD'])
 def actualizar_usuario(id: int, usuario_actualizado: modelUsuario):
